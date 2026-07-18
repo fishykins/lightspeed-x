@@ -1,6 +1,7 @@
 use crate::{LsError, LsResult, auth::Scope};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
+use url::Url;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TokenRequest<'a> {
@@ -63,9 +64,20 @@ impl Tokens {
         Ok(())
     }
 
+    pub fn default_path(&self) -> String {
+        format!("tokens/{}.json", self.domain_prefix)
+    }
+
     pub fn load<P: AsRef<Path>>(path: P) -> LsResult<Self> {
         let json = fs::read_to_string(path)?;
 
         Ok(serde_json::from_str(&json)?)
+    }
+
+    pub fn base_url(&self) -> LsResult<Url> {
+        Ok(Url::parse(&format!(
+            "https://{}.retail.lightspeed.app/api/2.0/",
+            self.domain_prefix
+        ))?)
     }
 }
