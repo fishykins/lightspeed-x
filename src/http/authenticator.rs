@@ -5,7 +5,7 @@ use tokio::sync::RwLock;
 use url::Url;
 
 use crate::{
-    LsError, LsResult,
+    LS_VERSION, LsError, LsResult,
     auth::{Config, TokenResponse, Tokens},
 };
 
@@ -33,6 +33,7 @@ impl Authenticator {
         Ok(tokens.access_token.clone())
     }
 
+    /// Returns the base url, up to and including api version (ie: 2026-07).
     pub fn base_url(&self) -> &Url {
         &self.base_url
     }
@@ -92,7 +93,7 @@ impl Authenticator {
 
         let tokens: Tokens = serde_json::from_str(&contents)?;
 
-        let base_url = tokens.base_url()?;
+        let base_url = tokens.base_url()?.join(LS_VERSION)?;
 
         Ok(Self {
             config: Arc::new(config.clone()),

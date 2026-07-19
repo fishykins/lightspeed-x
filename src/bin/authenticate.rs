@@ -6,7 +6,17 @@ use lightspeed_x::auth::{
 async fn main() {
     let config = Config::from_env();
 
-    let auth_request = AuthorizationRequest::new("testymctest", vec![Scope::SalesRead]);
+    let auth_request = AuthorizationRequest::new(
+        "testymctest",
+        vec![
+            Scope::SalesRead,
+            Scope::SalesWrite,
+            Scope::ProductsRead,
+            Scope::ProductsWrite,
+            Scope::CustomersWrite,
+            Scope::CustomersWrite,
+        ],
+    );
 
     let url = auth_request.url(&config);
     println!("Url: {url}");

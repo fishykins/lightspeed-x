@@ -27,3 +27,5 @@ pub enum LsError {
 }
 
 pub type LsResult<T> = std::result::Result<T, LsError>;
+
+pub const LS_VERSION: &str = "2026-07/";

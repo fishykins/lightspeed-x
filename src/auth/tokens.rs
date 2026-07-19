@@ -1,5 +1,5 @@
 use crate::{LsError, LsResult, auth::Scope};
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 use url::Url;
@@ -76,9 +76,12 @@ impl Tokens {
         Ok(serde_json::from_str(&json)?)
     }
 
+    /// Returns the base Url without the api version appended.
+    /// Oauth and token calls often use 2.0 or 1.0, wheras main api calls
+    /// use more detailed verison control.
     pub fn base_url(&self) -> LsResult<Url> {
         Ok(Url::parse(&format!(
-            "https://{}.retail.lightspeed.app/api/2.0/",
+            "https://{}.retail.lightspeed.app/api/",
             self.domain_prefix
         ))?)
     }

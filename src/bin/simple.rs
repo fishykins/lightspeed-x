@@ -7,8 +7,11 @@ async fn main() {
         .await
         .expect("no client :(");
 
-    client
-        .blast_api_with_nonsense()
+    let product = client
+        .products()
+        .get_all()
         .await
-        .expect("failed to api, bad luck");
+        .expect("failed to get product");
+
+    println!("Product found: {}", product);
 }
