@@ -1,4 +1,5 @@
 use crate::{LsError, LsResult, auth::Scope};
+use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use std::{fs, path::Path};
 use url::Url;
@@ -28,11 +29,13 @@ impl TryFrom<TokenResponse> for Tokens {
     type Error = LsError;
 
     fn try_from(response: TokenResponse) -> Result<Self, Self::Error> {
+        let expires_at = DateTime::<Utc>::from_timestamp(response.expires, 0)
+            .ok_or_else(|| LsError::OAuth("Invalid expiry timestamp".into()))?;
+
         Ok(Self {
             access_token: response.access_token,
             refresh_token: response.refresh_token,
-            expires: response.expires,
-            expires_in: response.expires_in,
+            expires_at,
             domain_prefix: response.domain_prefix,
             scope: Scope::parse(&response.scope),
         })
@@ -42,8 +45,7 @@ impl TryFrom<TokenResponse> for Tokens {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Tokens {
     pub access_token: String,
-    pub expires: i64,
-    pub expires_in: u64,
+    pub expires_at: DateTime<Utc>,
     pub refresh_token: String,
     pub domain_prefix: String,
     pub scope: Vec<Scope>,
@@ -79,5 +81,31 @@ impl Tokens {
             "https://{}.retail.lightspeed.app/api/2.0/",
             self.domain_prefix
         ))?)
+    }
+
+    pub fn needs_refresh(&self) -> bool {
+        Utc::now() >= self.expires_at - chrono::Duration::seconds(60)
+    }
+}
+
+impl TokenResponse {
+    pub fn validate(&self) -> LsResult<()> {
+        if self.access_token.is_empty() {
+            return Err(LsError::OAuth(
+                "OAuth server returned an empty access token".into(),
+            ));
+        }
+
+        if self.refresh_token.is_empty() {
+            return Err(LsError::OAuth(
+                "OAuth server returned an empty refresh token".into(),
+            ));
+        }
+
+        Ok(())
+    }
+
+    pub fn access_token(&self) -> &str {
+        &self.access_token
     }
 }

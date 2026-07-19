@@ -13,14 +13,14 @@ impl LightspeedClient {
         config: Config,
         token_path: P,
     ) -> LsResult<Self> {
-        let auth = Authenticator::load(token_path, &config).await?;
+        let auth = Authenticator::load(token_path, &config, reqwest::Client::new()).await?;
 
         Ok(Self::from_authenticator(auth))
     }
 
     pub fn from_authenticator(auth: Authenticator) -> Self {
         Self {
-            http: reqwest::Client::new(),
+            http: auth.http.clone(),
             auth: Arc::new(auth),
         }
     }

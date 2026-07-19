@@ -10,6 +10,7 @@ pub use config::Config;
 pub use oauth_client::OAuthClient;
 pub use request::AuthorizationRequest;
 pub use scope::Scope;
-pub use tokens::{TokenRequest, Tokens};
+pub use tokens::Tokens;
+pub(crate) use tokens::{TokenRequest, TokenResponse};
 
 pub const AUTHORIZE_URL: &str = "https://secure.retail.lightspeed.app/connect";
