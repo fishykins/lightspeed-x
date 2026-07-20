@@ -7,11 +7,13 @@ async fn main() {
         .await
         .expect("no client :(");
 
-    let product = client
+    let products = client
         .products()
         .get_all()
         .await
         .expect("failed to get product");
 
-    println!("Product found: {}", product);
+    for product in products.data {
+        println!("{:?} -{:?}", product.name, product.sku);
+    }
 }

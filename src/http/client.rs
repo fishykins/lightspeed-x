@@ -83,6 +83,7 @@ impl LightspeedClientInner {
             .http
             .request(method, url)
             .bearer_auth(token)
+            .header("accept", "application/json")
             .send()
             .await?;
 
