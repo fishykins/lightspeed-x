@@ -34,25 +34,6 @@ impl LightspeedClient {
         }
     }
 
-    pub async fn blast_api_with_nonsense(&self) -> LsResult<()> {
-        let token = self.inner.auth.bearer_token().await?;
-
-        let url = format!(
-            "{}sales/65ba0a2f-b33b-828d-11f1-80f7ddf85842",
-            self.inner.auth.base_url()
-        );
-
-        println!("GET {}", url);
-
-        let response = self.inner.http.get(url).bearer_auth(token).send().await?;
-        let body = response.text().await?;
-
-        println!("Response body:");
-        println!("{}", body);
-
-        Ok(())
-    }
-
     pub fn products(&self) -> Products {
         Products {
             client: self.inner.clone(),
@@ -66,10 +47,11 @@ impl LightspeedClientInner {
         T: DeserializeOwned,
     {
         let response = self.request(Method::GET, endpoint).await?;
+        let body = response.text().await?;
+        println!("{}", body);
+        let value: T = serde_json::from_str(&body)?;
 
-        println!("Response: {:?}", response);
-
-        Ok(response.json::<T>().await?)
+        Ok(value)
     }
 
     async fn request(&self, method: Method, endpoint: &str) -> LsResult<Response> {
