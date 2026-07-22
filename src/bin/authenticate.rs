@@ -1,11 +1,9 @@
 use lightspeed_x::auth::{
-    AuthorizationRequest, Config, LocalCallbackServer, OAuthClient, Scope, Tokens,
+    AuthorizationCallback, AuthorizationRequest, Config, LocalCallbackServer, OAuthClient, Scope,
+    Tokens,
 };
 
-#[tokio::main]
-async fn main() {
-    let config = Config::from_env();
-
+async fn make_auth_request(config: &Config, path: &str) -> AuthorizationCallback {
     let auth_request = AuthorizationRequest::new(
         "testymctest",
         vec![
@@ -21,20 +19,38 @@ async fn main() {
     let url = auth_request.url(&config);
     println!("Url: {url}");
 
-    let authorization_callback = LocalCallbackServer::authenticate(&config, &auth_request)
+    let auth_callback = LocalCallbackServer::authenticate(&config, &auth_request)
         .await
-        .expect("Failed to start server");
+        .expect("failed to request auth code");
 
-    println!("callback: {:?}", authorization_callback);
+    auth_callback
+        .save(path)
+        .expect("Failed to write auth_callback.json to file");
+    auth_callback
+}
+
+#[tokio::main]
+async fn main() {
+    let config = Config::from_env();
+
+    // We create a local cache of the request incase of silly errors later- this api call is
+    // expensive and we get rate limited very quickly so if this works, store the data!!!
+    let temp_auth_callback_path = format!("tokens/temp_{}.json", config.client_id);
+
+    let auth_callback = AuthorizationCallback::load(&temp_auth_callback_path)
+        .unwrap_or(make_auth_request(&config, &temp_auth_callback_path).await);
 
     let tokens: Tokens = OAuthClient::new(&config)
-        .exchange_code(&authorization_callback)
+        .exchange_code(&auth_callback)
         .await
-        .expect("Failed Oauth");
+        .expect("Failed token Oauth");
 
     println!("OAuth Tokens: {:?}", tokens);
 
     tokens
         .save(format!("tokens/{}.json", tokens.domain_prefix))
         .expect("Failed to save token to file, this really was a fall at the last hurdle");
+
+    std::fs::remove_file(temp_auth_callback_path)
+        .expect("failed to clean up but otherwise good job");
 }

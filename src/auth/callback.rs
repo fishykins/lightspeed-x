@@ -3,7 +3,7 @@ use crate::{
     auth::{AuthorizationRequest, Config},
 };
 
-use std::sync::Arc;
+use std::{fs, path::Path, sync::Arc};
 
 use axum::{
     Router,
@@ -11,10 +11,10 @@ use axum::{
     response::Html,
     routing::get,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use tokio::sync::{Mutex, oneshot};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct AuthorizationCallback {
     pub code: String,
     pub domain_prefix: String,
@@ -46,9 +46,17 @@ impl LocalCallbackServer {
             .route("/callback", get(LocalCallbackServer::callback))
             .with_state(state);
 
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:8080")
-            .await
-            .expect("listener failed)");
+        let host = config
+            .redirect_uri
+            .host_str()
+            .expect("redirect URI must have a host");
+
+        let port = config
+            .redirect_uri
+            .port_or_known_default()
+            .expect("redirect URI must have a port");
+
+        let listener = tokio::net::TcpListener::bind((host, port)).await?;
 
         // Run the server in the background.
         let server = tokio::spawn(async move { axum::serve(listener, app).await });
@@ -77,5 +85,27 @@ impl LocalCallbackServer {
             "<h2>Authentication successful.</h2>\
          <p>You may now close this window.</p>",
         )
+    }
+}
+
+impl AuthorizationCallback {
+    pub fn save<P: AsRef<Path>>(&self, path: P) -> LsResult<()> {
+        let path = path.as_ref();
+
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent)?;
+        }
+
+        let json = serde_json::to_string_pretty(self)?;
+
+        fs::write(path, json)?;
+
+        Ok(())
+    }
+
+    pub fn load<P: AsRef<Path>>(path: P) -> LsResult<Self> {
+        let path = path.as_ref();
+        let json = fs::read_to_string(path)?;
+        Ok(serde_json::from_str(&json)?)
     }
 }

@@ -22,6 +22,8 @@ impl Config {
         )
         .expect("Failed to parse redirect url");
 
+        println!("{:?}", redirect_uri);
+
         Self {
             client_id,
             client_secret,

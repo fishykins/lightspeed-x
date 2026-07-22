@@ -30,6 +30,8 @@ impl<'a> OAuthClient<'a> {
             redirect_uri: self.config.redirect_uri.as_str(),
         };
 
+        println!("TokenRequest: {:?}", request);
+
         let response = self.http.post(url).form(&request).send().await?;
 
         if !response.status().is_success() {
