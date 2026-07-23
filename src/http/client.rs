@@ -5,7 +5,7 @@ use serde::de::DeserializeOwned;
 
 use crate::{
     LsResult,
-    api::Products,
+    api::{Products, Sales},
     auth::{Config, Tokens},
     http::Authenticator,
 };
@@ -55,6 +55,12 @@ impl LightspeedClient {
             client: self.inner.clone(),
         }
     }
+
+    pub fn sales(&self) -> Sales {
+        Sales {
+            client: self.inner.clone(),
+        }
+    }
 }
 
 impl LightspeedClientInner {
@@ -64,6 +70,10 @@ impl LightspeedClientInner {
     {
         let response = self.request(Method::GET, endpoint).await?;
         let body = response.text().await?;
+        std::fs::write(
+            format!("cache/api/{}.json", str::replace(endpoint, "/", "_")),
+            &body,
+        )?;
         let value: T = serde_json::from_str(&body)?;
 
         Ok(value)

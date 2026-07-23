@@ -1,6 +1,6 @@
 mod contact;
-mod product;
-mod sale;
+mod products;
+mod sales;
 
-pub use product::Products;
-pub use sale::{Sale, SaleList};
+pub use products::Products;
+pub use sales::Sales;

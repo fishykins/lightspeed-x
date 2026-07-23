@@ -1,21 +1,7 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
-use crate::models::{
-    common::VersionRange,
-    products::{Brand, Category, Supplier},
-};
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ProductList {
-    pub data: Vec<Product>,
-    pub version: VersionRange,
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct ProductResponse {
-    pub data: Product,
-}
+use crate::models::products::{Brand, Category, Supplier};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Product {
