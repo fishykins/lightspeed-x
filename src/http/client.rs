@@ -3,7 +3,12 @@ use std::{path::Path, sync::Arc};
 use reqwest::{Method, Response};
 use serde::de::DeserializeOwned;
 
-use crate::{LsResult, api::Products, auth::Config, http::Authenticator};
+use crate::{
+    LsResult,
+    api::Products,
+    auth::{Config, Tokens},
+    http::Authenticator,
+};
 
 pub struct LightspeedClient {
     pub(crate) inner: Arc<LightspeedClientInner>,
@@ -16,11 +21,22 @@ pub(crate) struct LightspeedClientInner {
 }
 
 impl LightspeedClient {
-    pub async fn new<P: AsRef<Path> + Into<String>>(
+    pub async fn from_path<P: AsRef<Path> + Into<String> + std::fmt::Debug>(
         config: Config,
         token_path: P,
     ) -> LsResult<Self> {
         let auth = Authenticator::load(token_path, &config, reqwest::Client::new()).await?;
+
+        Ok(Self::from_authenticator(auth))
+    }
+
+    pub async fn from_config(config: Config) -> LsResult<Self> {
+        let auth = Authenticator::load(
+            Tokens::path_from_domain(&config.domain_prefix),
+            &config,
+            reqwest::Client::new(),
+        )
+        .await?;
 
         Ok(Self::from_authenticator(auth))
     }
@@ -48,7 +64,6 @@ impl LightspeedClientInner {
     {
         let response = self.request(Method::GET, endpoint).await?;
         let body = response.text().await?;
-        println!("{}", body);
         let value: T = serde_json::from_str(&body)?;
 
         Ok(value)

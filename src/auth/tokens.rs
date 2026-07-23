@@ -67,7 +67,11 @@ impl Tokens {
     }
 
     pub fn default_path(&self) -> String {
-        format!("tokens/{}.json", self.domain_prefix)
+        Self::path_from_domain(&self.domain_prefix)
+    }
+
+    pub fn path_from_domain(domain_prefix: impl Into<String>) -> String {
+        format!("tokens/{}.json", domain_prefix.into())
     }
 
     pub fn load<P: AsRef<Path>>(path: P) -> LsResult<Self> {

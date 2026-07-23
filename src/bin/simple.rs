@@ -1,9 +1,9 @@
-use lightspeed_x::{auth::Config, http::LightspeedClient};
+use lightspeed_x::{LsResult, auth::Config, http::LightspeedClient};
 
 #[tokio::main]
-async fn main() {
+async fn main() -> LsResult<()> {
     let config = Config::from_env();
-    let client = LightspeedClient::new(config, "tokens/valleysawmills.json")
+    let client = LightspeedClient::from_config(config)
         .await
         .expect("no client :(");
 
@@ -25,9 +25,14 @@ async fn main() {
     }
     */
 
-    let product = client
+    let product_result = client
         .products()
         .get("2cb8d5cd-01f8-4096-9cf8-3d35105a34bb")
-        .await;
-    println!("Product: {:?}", product);
+        .await?;
+
+    let product = product_result.data;
+
+    println!("{}: {:?}", product.sku, product.handle);
+
+    Ok(())
 }

@@ -84,11 +84,12 @@ impl Authenticator {
         Ok(())
     }
 
-    pub async fn load<P: AsRef<Path> + Into<String>>(
+    pub async fn load<P: AsRef<Path> + Into<String> + std::fmt::Debug>(
         token_path: P,
         config: &Config,
         http: reqwest::Client,
     ) -> LsResult<Self> {
+        println!("fs::read_to_string({:?})", token_path);
         let contents = tokio::fs::read_to_string(&token_path).await?;
 
         let tokens: Tokens = serde_json::from_str(&contents)?;
