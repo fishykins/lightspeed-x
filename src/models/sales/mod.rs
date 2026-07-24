@@ -6,6 +6,7 @@ mod pricing;
 mod promotion;
 mod sales;
 mod tax;
+mod webhook;
 
 pub use adjustment::SaleAdjustment;
 pub use customization::Customization;
@@ -15,3 +16,4 @@ pub use pricing::Pricing;
 pub use promotion::Promotion;
 pub use sales::*;
 pub use tax::{Tax, TaxComponent, TaxSummary};
+pub use webhook::WebhookSale;
