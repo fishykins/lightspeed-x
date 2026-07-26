@@ -3,7 +3,7 @@ use lightspeed_x::{LsResult, auth::Config, http::LightspeedClient, models::sales
 #[tokio::main]
 async fn main() -> LsResult<()> {
     let config = Config::from_env();
-    let client = LightspeedClient::from_config(config)
+    let client = LightspeedClient::from_config(&config)
         .await
         .expect("no client :(");
 

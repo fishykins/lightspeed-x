@@ -10,6 +10,7 @@ use crate::{
     http::Authenticator,
 };
 
+#[derive(Clone)]
 pub struct LightspeedClient {
     pub(crate) inner: Arc<LightspeedClientInner>,
 }
@@ -30,10 +31,10 @@ impl LightspeedClient {
         Ok(Self::from_authenticator(auth))
     }
 
-    pub async fn from_config(config: Config) -> LsResult<Self> {
+    pub async fn from_config(config: &Config) -> LsResult<Self> {
         let auth = Authenticator::load(
             Tokens::path_from_domain(&config.domain_prefix),
-            &config,
+            config,
             reqwest::Client::new(),
         )
         .await?;

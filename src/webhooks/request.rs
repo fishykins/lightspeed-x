@@ -3,22 +3,32 @@ use sha2::Sha256;
 use std::collections::HashMap;
 
 type HmacSha256 = Hmac<Sha256>;
+const X_SIGNATURE: &'static str = "X-Signature";
 
 use crate::{
     LsError, LsResult,
     webhooks::{Signature, SignatureAlgorithm, WebhookForm},
 };
 
+#[derive(Debug)]
 pub struct WebhookRequest {
     pub headers: HashMap<String, String>,
     pub body: Vec<u8>,
 }
 
 impl WebhookRequest {
+    pub fn new(headers: HashMap<String, String>, body: Vec<u8>) -> Self {
+        Self { headers, body }
+    }
+
+    pub fn can_verify(&self) -> bool {
+        self.headers.get(X_SIGNATURE).is_some()
+    }
+
     pub fn verify(&self, client_secret: &str) -> LsResult<()> {
         let signature: Signature = self
             .headers
-            .get("X-Signature")
+            .get(X_SIGNATURE)
             .ok_or(LsError::MissingSignature)?
             .parse()?;
 
