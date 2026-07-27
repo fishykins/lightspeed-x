@@ -44,6 +44,10 @@ impl WebhookForm {
             return WebhookKind::Product;
         }
 
+        if looks_like_customer(&value) {
+            return WebhookKind::Customer;
+        }
+
         WebhookKind::Unknown
     }
 }
@@ -62,4 +66,12 @@ fn looks_like_sale(value: &Value) -> bool {
     };
 
     obj.contains_key("sale_date") && obj.contains_key("taxes") && obj.contains_key("register_id")
+}
+
+fn looks_like_customer(value: &Value) -> bool {
+    let Some(obj) = value.as_object() else {
+        return false;
+    };
+
+    obj.contains_key("balance") && obj.contains_key("contact_first_name")
 }

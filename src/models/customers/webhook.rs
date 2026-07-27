@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Utc};
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -13,7 +13,7 @@ pub struct WebhookCustomer {
     pub contact_first_name: Option<String>,
     pub contact_last_name: Option<String>,
 
-    pub created_at: NaiveDateTime,
+    pub created_at: DateTime<Utc>,
 
     pub custom_field_1: Option<String>,
     pub custom_field_2: Option<String>,
@@ -26,11 +26,9 @@ pub struct WebhookCustomer {
 
     pub date_of_birth: Option<String>,
 
-    pub deleted_at: Option<NaiveDateTime>,
+    pub deleted_at: Option<DateTime<Utc>>,
 
     pub do_not_email: bool,
-
-    pub enable_promotional_sms: bool,
 
     pub email: Option<String>,
 
@@ -52,11 +50,9 @@ pub struct WebhookCustomer {
 
     pub phone: Option<String>,
 
-    pub points: i64,
-
     pub sex: Option<String>,
 
-    pub updated_at: NaiveDateTime,
+    pub updated_at: DateTime<Utc>,
 
     pub year_to_date: Decimal,
 }

@@ -23,6 +23,10 @@ impl TryFrom<WebhookForm> for WebhookEvent {
                 let product: WebhookProduct = form.parse()?;
                 Ok(WebhookEvent::Product(product))
             }
+            WebhookKind::Customer => {
+                let customer: WebhookCustomer = form.parse()?;
+                Ok(WebhookEvent::Customer(customer))
+            }
             value => Result::Err(LsError::Other(format!(
                 "Unknown WebhookForm.kind(): {:?}",
                 value
