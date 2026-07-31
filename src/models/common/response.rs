@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 use crate::{LsResult, models::common::VersionRange};
 
@@ -25,6 +25,17 @@ where
         tokio::fs::write(path.into(), json).await?;
 
         Ok(())
+    }
+}
+
+impl<T> ListResponse<T>
+where
+    T: DeserializeOwned,
+{
+    pub async fn read_from_file<P: Into<PathBuf>>(path: P) -> LsResult<Self> {
+        let json = tokio::fs::read(path.into()).await?;
+
+        Ok(serde_json::from_slice(&json)?)
     }
 }
 
