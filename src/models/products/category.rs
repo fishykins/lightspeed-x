@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, PartialOrd, Eq, Hash)]
 pub struct Category {
-    pub id: String,
+    pub id: Uuid,
     pub name: String,
     pub version: u64,
 }

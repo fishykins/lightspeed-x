@@ -1,12 +1,13 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::models::products::{Brand, Category, Supplier};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Product {
     // Identity
-    pub id: String,
+    pub id: Uuid,
     pub sku: String,
     pub handle: String,
 
@@ -66,28 +67,28 @@ pub struct Product {
     pub product_type: Option<ProductType>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ProductType {
     pub id: String,
     pub name: String,
     pub version: u64,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ProductCode {
     pub code: String,
     #[serde(rename = "type")]
     pub code_type: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct VariantOption {
     pub id: String,
     pub name: String,
     pub value: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ProductImage {
     pub id: String,
     pub url: String,
@@ -95,7 +96,7 @@ pub struct ProductImage {
     pub sizes: ImageSizes,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ImageSizes {
     pub original: String,
     pub standard: String,

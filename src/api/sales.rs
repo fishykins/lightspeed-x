@@ -1,6 +1,6 @@
 use crate::{
     LsResult,
-    http::LightspeedClientInner,
+    http::{LightspeedClientInner, Request},
     models::{
         common::{ListResponse, ObjectResponse},
         sales::Sale,
@@ -14,10 +14,12 @@ pub struct Sales {
 
 impl Sales {
     pub async fn get(&self, uuid: &str) -> LsResult<ObjectResponse<Sale>> {
-        self.client.get(&format!("sales/{}", uuid)).await
+        let request = Request::get(format!("sales/{}", uuid));
+        self.client.request(request).await
     }
 
     pub async fn get_all(&self) -> LsResult<ListResponse<Sale>> {
-        self.client.get("sales").await
+        let request = Request::get("sales");
+        self.client.request(request).await
     }
 }

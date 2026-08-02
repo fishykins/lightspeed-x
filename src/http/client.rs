@@ -1,7 +1,5 @@
-use std::{path::Path, sync::Arc};
-
-use reqwest::{Method, Response};
 use serde::de::DeserializeOwned;
+use std::{path::Path, sync::Arc};
 
 use crate::{
     LsResult,
@@ -65,36 +63,27 @@ impl LightspeedClient {
 }
 
 impl LightspeedClientInner {
-    pub(crate) async fn get<T>(&self, endpoint: &str) -> LsResult<T>
+    pub async fn request<T>(&self, request: super::Request) -> LsResult<T>
     where
         T: DeserializeOwned,
     {
-        let response = self.request(Method::GET, endpoint).await?;
-        let body = response.text().await?;
-        std::fs::write(
-            format!("cache/api/{}.json", str::replace(endpoint, "/", "_")),
-            &body,
-        )?;
-        let value: T = serde_json::from_str(&body)?;
-
-        Ok(value)
-    }
-
-    async fn request(&self, method: Method, endpoint: &str) -> LsResult<Response> {
         let token = self.auth.bearer_token().await?;
 
-        let url = format!("{}{}", self.auth.base_url(), endpoint);
+        let url = format!("{}{}", self.auth.base_url(), request.endpoint);
 
-        println!("{} {}", method, url);
+        println!("{} {}", request.method, url);
 
-        let response = self
+        let call = self
             .http
-            .request(method, url)
+            .request(request.method.clone(), url)
+            .query(&request.query)
             .bearer_auth(token)
-            .header("accept", "application/json")
-            .send()
-            .await?;
+            .header("accept", "application/json");
 
-        Ok(response)
+        let response = call.send().await?;
+
+        let value: T = serde_json::from_str(&response.text().await?)?;
+
+        Ok(value)
     }
 }
