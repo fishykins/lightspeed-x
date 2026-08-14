@@ -1,5 +1,8 @@
+use uuid::Uuid;
+
 use crate::{
     LsResult,
+    api::Payload,
     http::{LightspeedClientInner, Request},
     models::{
         common::{ListResponse, ObjectResponse},
@@ -51,6 +54,16 @@ impl Products {
         if calls == 0 {
             println!("Not enough api calls allowed- consider upping MAX_CALLS const")
         }
+
+        Ok(response)
+    }
+
+    pub async fn upload(&self, product: &Product) -> LsResult<Vec<Uuid>> {
+        let payload = Payload::from(product).build();
+
+        let request = Request::post("product").with_payload(payload);
+
+        let response = self.client.request(request).await?;
 
         Ok(response)
     }
