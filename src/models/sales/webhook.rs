@@ -138,11 +138,11 @@ pub struct WebhookSaleTotals {
     pub total_loyalty: Decimal,
 
     pub total_payment: Decimal,
-
+    /// Looks like the price ex vat (probably).
     pub total_price: Decimal,
 
     pub total_tax: Decimal,
-
+    /// Total to pay, including vat.
     pub total_to_pay: Decimal,
 }
 
