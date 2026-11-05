@@ -11,8 +11,10 @@ async fn make_auth_request(config: &Config, path: &str) -> AuthorizationCallback
             Scope::SalesWrite,
             Scope::ProductsRead,
             Scope::ProductsWrite,
+            Scope::CustomersRead,
             Scope::CustomersWrite,
-            Scope::CustomersWrite,
+            Scope::InventoryRead,
+            Scope::InventoryWrite,
         ],
     );
 

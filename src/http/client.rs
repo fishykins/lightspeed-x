@@ -3,7 +3,7 @@ use std::{path::Path, sync::Arc};
 
 use crate::{
     LsResult,
-    api::{Products, Sales},
+    api::{Customers, Groups, Products, Sales},
     auth::{Config, Tokens},
     http::Authenticator,
 };
@@ -60,6 +60,18 @@ impl LightspeedClient {
             client: self.inner.clone(),
         }
     }
+
+    pub fn groups(&self) -> Groups {
+        Groups {
+            client: self.inner.clone(),
+        }
+    }
+
+    pub fn customers(&self) -> Customers {
+        Customers {
+            client: self.inner.clone(),
+        }
+    }
 }
 
 impl LightspeedClientInner {
@@ -71,7 +83,7 @@ impl LightspeedClientInner {
 
         let url = format!("{}{}", self.auth.base_url(), request.endpoint);
 
-        println!("{} {}", request.method, url);
+        //println!("{} {}/{:?}", request.method, url, request.query);
 
         let call = self
             .http
@@ -81,6 +93,8 @@ impl LightspeedClientInner {
             .header("accept", "application/json");
 
         let response = call.send().await?;
+
+        println!("{:?}", &response);
 
         let value: T = serde_json::from_str(&response.text().await?)?;
 

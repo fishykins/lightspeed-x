@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::{
     LsResult,
-    api::Payload,
+    api::{Payload, get_listed_item},
     http::{LightspeedClientInner, Request},
     models::{
         common::{ListResponse, ObjectResponse},
@@ -11,7 +11,8 @@ use crate::{
 };
 use std::sync::Arc;
 
-const MAX_CALLS: u32 = 6;
+const MAX_CALLS: usize = 6;
+const PAGE_SIZE: usize = 1000;
 
 pub struct Products {
     pub(crate) client: Arc<LightspeedClientInner>,
@@ -24,38 +25,7 @@ impl Products {
     }
 
     pub async fn get_all(&self) -> LsResult<ListResponse<Product>> {
-        let request = Request::get("products").with_query("page_size", "1000");
-        let mut response: ListResponse<Product> = self.client.request(request).await?;
-
-        let mut calls = MAX_CALLS;
-        let mut response_len = response.data.len();
-
-        while response_len == 1000 && calls > 0 {
-            println!(
-                "Getting additional page of products after {}...",
-                response.version.max.to_string()
-            );
-            let request = Request::get("products")
-                .with_query("page_size", "1000")
-                .with_query("after", response.version.max.to_string());
-
-            let next: ListResponse<Product> = self.client.request(request.clone()).await?;
-
-            if next.data.is_empty() {
-                break;
-            }
-
-            response_len = next.data.len();
-            response.data.extend(next.data);
-            response.version.max = next.version.max;
-            calls -= 1;
-        }
-
-        if calls == 0 {
-            println!("Not enough api calls allowed- consider upping MAX_CALLS const")
-        }
-
-        Ok(response)
+        get_listed_item(self.client.clone(), "products", PAGE_SIZE, MAX_CALLS).await
     }
 
     pub async fn upload(&self, product: &Product) -> LsResult<Vec<Uuid>> {
